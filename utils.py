@@ -2,6 +2,7 @@ import hashlib
 import secrets
 import os
 import time
+import re
 from urllib.parse import quote
 
 def get_domain() -> str:
@@ -61,3 +62,33 @@ async def parse_vless_header(first_chunk: bytes):
     else:
         raise ValueError(f"unknown address type: {addr_type}")
     return command, address, port, first_chunk[pos:]
+
+def extract_uuid_from_link(text: str) -> str | None:
+    match = re.search(r"vless://([a-f0-9\-]{36})", text)
+    if match:
+        return match.group(1)
+    return None
+
+def format_bytes(b: int) -> str:
+    if b > 1073741824: return f"{(b / 1073741824):.2f} GB"
+    if b > 1048576: return f"{(b / 1048576):.2f} MB"
+    return f"{(b / 1024):.1f} KB"
+
+def format_bot_reply(label: str, used: int, limit: int, active: bool) -> str:
+    status = "Active" if active else "Disabled"
+    limit_str = "Unlimited" if limit == 0 else format_bytes(limit)
+    used_str = format_bytes(used)
+    
+    reply = "Traffic Status\n"
+    reply += "----------------\n"
+    reply += f"Name: {label}\n"
+    reply += f"Status: {status}\n"
+    reply += f"Used: {used_str}\n"
+    reply += f"Limit: {limit_str}\n"
+    
+    if limit > 0:
+        remaining = limit - used
+        rem_str = format_bytes(remaining) if remaining > 0 else "0 MB"
+        reply += f"Remaining: {rem_str}\n"
+        
+    return reply

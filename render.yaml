@@ -10,3 +10,5 @@ services:
         value: admin
       - key: SECRET_KEY
         generateValue: true
+      - key: TELEGRAM_BOT_TOKEN
+        value: 
