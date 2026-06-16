@@ -51,6 +51,18 @@ http_client: httpx.AsyncClient | None = None
 def hash_password(pw: str) -> str:
     return hashlib.sha256(f"{pw}{CONFIG['secret']}".encode()).hexdigest()
 
+async def keep_alive():
+    while True:
+        await asyncio.sleep(600)
+        try:
+            domain = utils.get_domain()
+            if domain and domain != "localhost":
+                async with httpx.AsyncClient(timeout=10.0) as client:
+                    await client.get(f"https://{domain}/health")
+                logger.info("Keep-alive ping sent")
+        except Exception:
+            pass
+
 async def telegram_bot_polling():
     token = os.environ.get("TELEGRAM_BOT_TOKEN")
     if not token or token == "your_bot_token_here":
