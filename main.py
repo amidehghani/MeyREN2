@@ -370,7 +370,6 @@ async def websocket_tunnel(websocket: WebSocket, uuid: str):
             try: writer.close()
             except: pass
         connections.pop(conn_id, None)
-        connection_sockets.pop(conn_id, None)
 
 
 @app.get("/login", response_class=HTMLResponse)
